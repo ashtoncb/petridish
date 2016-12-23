@@ -15,7 +15,7 @@ from petridish.src.utils import Session
 # metadata
 # --------
 __author__ = 'Ashton Berger'
-__email__ = 'ashtoncberger@broadinstitute.org'
+__email__ = 'ashton@broadinstitute.org'
 __version__ = '0.0.1'
 
 # path configuration
