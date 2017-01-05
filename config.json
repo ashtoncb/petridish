@@ -1,5 +1,6 @@
 {
     "host": "localhost",
     "port": 27017,
-    "write": true
+    "write": true,
+    "genome": "hg19"
 }

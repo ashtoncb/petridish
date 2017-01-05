@@ -591,7 +591,7 @@ class Sample(ModelBase):
             print 'No segment found for sample on chromosome {}.'.format(str(contig))
         return None
 
-    def CN_by_gene(self, symbol, use_ensembl=True):
+    def CN_by_gene(self, symbol, use_ensembl=False):
         if use_ensembl:
             gene = ensembl.models.Gene(symbol)
             if not gene.contig or not gene.start or not gene.stop:
@@ -599,8 +599,13 @@ class Sample(ModelBase):
             else:
                 ival = '{}:{}-{}'.format(str(gene.contig).strip('chr'),str(gene.start),str(gene.stop))
                 return self.CN_by_interval(ival, quiet=True)
-        print 'Sorry, other gene querying methods have yet to be implemented.'
-        return None
+        try:
+            contig, start, stop = session.gene_coords[symbol]
+        except KeyError:
+            raise ValueError('Unable to provide copy number information for gene "{}".'.format(symbol))
+        else:
+            ival = '{}:{}-{}'.format(str(contig),str(start),str(stop))
+        return self.CN_by_interval(ival, quiet=True)
 
     # def CN_by_variant(self):
         # idk??

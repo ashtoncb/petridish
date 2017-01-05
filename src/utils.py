@@ -6,6 +6,7 @@
 # package imports
 # ---------------
 import os
+import pickle
 import pymongo
 
 
@@ -22,10 +23,11 @@ class Session(object):
         port (int): Port to connect to database with.
         write (bool): Whether or not to allow writing to the database.
     """
-    def __init__(self, host='localhost', port=27017, write=True, data_home=None):
+    def __init__(self, host='localhost', port=27017, write=True, genome='hg19', resource_home=None, data_home=None):
         self.host = host
         self.port = port
         self.write = write
+        self.gene_coords = pickle.load(open(os.path.join(resource_home, genome, 'gene_coords.p'), 'rb'))
         self._local_home = data_home if data_home[-1] == '/' else data_home+'/'
         self._client = None
         return
