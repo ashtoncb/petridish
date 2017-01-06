@@ -81,8 +81,6 @@ class Cohort(object):
 
     @property
     def _datadict(self):
-        if not self._cohort_path_contents:
-            return None
         for dtype in self._cohort_path_contents:
             if dtype not in self._datadicthidden.keys():
                 ds = DataSet(cohort_name=self.cohort_name,dtype=dtype,write=self._write)
@@ -91,11 +89,8 @@ class Cohort(object):
 
     @property
     def datasets(self):
-        if not self._datadict:
-            return None
         return self._datadict.keys()
-
-        
+ 
     def add_dataset(self, dtype, files, force=False, write=False):
         if not self._write:
             raise ValueError('Cohort is set to not allow writing or uploading of new data!')

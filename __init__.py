@@ -26,9 +26,6 @@ __config__ = os.path.join(__base__, 'config.json')
 __db__ = os.environ.get('PETRI_DATA', '/data/petri')
 __data__ = os.path.join(__db__, 'collections')
 
-if not os.path.exists(__data__):
-    os.makedirs(__data__)
-
 # instantiate session
 # -------------------
 default_dict = {
@@ -39,6 +36,7 @@ default_dict = {
     'write':True,
     'genome':'hg19'
     }
+
 defaults = composite(default_dict)
 
 if os.path.exists(__config__):
@@ -46,6 +44,9 @@ if os.path.exists(__config__):
         config = composite(config_reader)
         config_reader.close()
     defaults = defaults + config
+
+if not os.path.exists(defaults['data_home']):
+    os.makedirs(defaults['data_home'])
 
 global session
 session = Session(**defaults)
