@@ -29,17 +29,12 @@
 '''
 # package imports
 # ---------------
-#import ensembl.models as models
 import json
 import os
 import pandas as pd
 import pymongo
 import subprocess
 from cached_property import cached_property
-
-# ensembl imports
-#----------------
-import ensembl.models
 
 # petri imports
 #--------------
@@ -493,8 +488,6 @@ class Sample(ModelBase):
     def segments(self):
         '''
         all segments belonging to sample in seg file
-
-        look at getattr for gene and transcript in ensembl?
         '''
         mongoname = '-'.join(['petridish', self.cohort, self.dataset])
         try:
@@ -523,12 +516,13 @@ class Sample(ModelBase):
         if 'deleted' in keys:
             pass
         if 'gene' in keys:
-            symbol = kwargs['gene'].lower()
-            gene = ensembl.models.Gene(symbol)
-            if not gene.contig or not gene.start or not gene.stop:
+            symbol = kwargs['gene'].upper()
+            try:
+                gene_contig, gene_start, gene_stop = session.gene_coords[symbol]
+            except KeyError:
                 raise ValueError('Unable to provide copy number information for gene "{}".'.format(symbol))
             else:
-                segments = [seg for seg in self.segments if seg.chromosome == int(gene.contig.replace('chr', '')) and seg.start <= int(gene.stop) and int(gene.start) <= seg.stop]
+                segments = [seg for seg in self.segments if seg.chromosome == int(gene_contig) and seg.start <= int(gene_stop) and int(gene_start) <= seg.stop]
                 return segments if len(segments) > 0 else None
         else:
             print 'Sorry, other methods have yet to be implemented.'
@@ -665,6 +659,13 @@ class Segment(ModelBase):
     @property
     def info(self):
         return {'cohort': self.cohort, 'dataset': self.dataset, 'sample': self.sample, 'interval': self.interval}
+
+    @cached_property
+    def genes(self):
+        '''
+        all genes contained within a segment
+        '''
+        return filter(lambda x: self.chromosome == int(session.gene_coords[x][0]) and self.start <= int(session.gene_coords[x][2]) and int(session.gene_coords[x][1]) <= self.stop, session.gene_coords.keys())
 
     def print_copy_number(self, rounded=True):
         print 'Sample: {}'.format(self.sample)
