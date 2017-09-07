@@ -30,6 +30,7 @@
 # package imports
 # ---------------
 import json
+import numpy as np
 import os
 import pandas as pd
 import pymongo
@@ -515,8 +516,10 @@ class Sample(ModelBase):
             pass
         if 'deleted' in keys:
             pass
+        if 'interval' in keys:
+            pass
         if 'gene' in keys:
-            symbol = kwargs['gene'].upper()
+            symbol = kwargs['gene'].upper() if not 'orf' in kwargs['gene'] else kwargs['gene']
             try:
                 gene_contig, gene_start, gene_stop = session.gene_coords[symbol]
             except KeyError:
@@ -532,11 +535,10 @@ class Sample(ModelBase):
         cns = [seg.modal_total_cn for seg in self.segments]
         return max(set(cns), key=cns.count)
 
-    @staticmethod
-    def CN_by_segment(segments):
+    def CN_by_segment(self, segments):
         if segments:
             return {segment.sample_segment:segment.modal_total_cn for segment in segments}
-        return None
+        return {'{}>'.format(self.sample):np.nan}
 
     def CN_by_position(self, contig, coord, quiet=False):
         segments = [seg for seg in self.segments if seg.chromosome == int(contig) and seg.start <= int(coord) <= seg.stop]
@@ -560,11 +562,9 @@ class Sample(ModelBase):
             return None
         start, stop = coords.split('-')
         segments = [seg for seg in self.segments if seg.chromosome == int(contig) and seg.start <= int(stop) and int(start) <= seg.stop]
-        if segments:
-            return self.CN_by_segment(segments)
         if not quiet:
             print 'No segment found for sample that intersects this interval.'
-        return None
+        return self.CN_by_segment(segments)
 
     # def CN_by_band(self, band):
     #     pass
