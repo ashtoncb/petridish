@@ -526,10 +526,10 @@ class Sample(ModelBase):
                 raise ValueError('Unable to provide copy number information for gene "{}".'.format(symbol))
             else:
                 segments = [seg for seg in self.segments if seg.chromosome == int(gene_contig) and seg.start <= int(gene_stop) and int(gene_start) <= seg.stop]
-                return segments if len(segments) > 0 else None
+                return_segs.extend(segments)
         else:
             print 'Sorry, other methods have yet to be implemented.'
-        return None
+        return return_segs
 
     def modal_ploidy(self):
         cns = [seg.modal_total_cn for seg in self.segments]
